@@ -1,7 +1,7 @@
 package info.safronoff.gpsbeacon
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import info.safronoff.gpsbeacon.ui.main.MainFragment
 
 class MainActivity : AppCompatActivity() {
