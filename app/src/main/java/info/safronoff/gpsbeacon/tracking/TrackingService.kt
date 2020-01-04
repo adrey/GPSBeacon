@@ -15,9 +15,8 @@ import io.reactivex.schedulers.Schedulers
 import org.koin.android.ext.android.inject
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
-import android.os.BatteryManager
-
-
+import info.safronoff.gpsbeacon.devicedata.UpdateData
+import io.reactivex.disposables.Disposable
 
 
 class TrackingService : Service() {
@@ -30,10 +29,19 @@ class TrackingService : Service() {
         var isStarted = false
     }
 
-    private val api: API by inject<API>()
+    private val updateData: UpdateData by inject()
+
+    private var disposable: Disposable? = null
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        disposable?.let {
+            it.dispose()
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -53,31 +61,16 @@ class TrackingService : Service() {
 
     }
 
-    private fun getBatteryLevel(): Int {
-        val bm = getSystemService(Context.BATTERY_SERVICE) as BatteryManager
-        return bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
-    }
-
 
     private fun updateLocationAndStartAlarm() {
-        val getLocation = GetLocationImpl(applicationContext)
-        getLocation.exec()
-            .flatMap {
-                Timber.d("Got location ${it.latitude} ${it.longitude}, accuracy ${it.accuracy}")
-                val data = DeviceData(lat=it.latitude, lng = it.longitude, accuracy = it.accuracy, datetime = it.time, battery = getBatteryLevel())
-                api.updateDevicePosition("71dbb0997eec19c77395e75afa115287494e53418bbf2adaca17c0f93e57cf8b", data)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-            }
+        disposable = updateData.exec()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-
             .subscribe({
-                Timber.d("data sent")
-            },
-                {
-                    Timber.e(it.message)
-                })
+                Timber.d("data updated")
+            }, {
+                Timber.e(it)
+            })
         startLocationAlarm()
     }
 
