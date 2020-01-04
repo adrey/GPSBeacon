@@ -19,6 +19,7 @@ class GetLocationImpl(private val context: Context) : GetLocation {
 
     companion object {
         private const val ACCURACY = 30
+        private const val TIMEOUT = 30L
     }
 
     @SuppressLint("MissingPermission")
@@ -46,7 +47,7 @@ class GetLocationImpl(private val context: Context) : GetLocation {
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0f, listener)
 
-        return subject.timeout(30, TimeUnit.SECONDS)
+        return subject.timeout(TIMEOUT, TimeUnit.SECONDS)
             .doFinally { locationManager.removeUpdates(listener) }
     }
 

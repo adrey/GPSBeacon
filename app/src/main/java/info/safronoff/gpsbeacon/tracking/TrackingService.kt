@@ -7,12 +7,18 @@ import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock
 import androidx.core.app.NotificationCompat
-import info.safronoff.gpsbeacon.R
+import info.safronoff.gpsbeacon.api.API
+import info.safronoff.gpsbeacon.api.DeviceData
 import info.safronoff.gpsbeacon.utils.GetLocationImpl
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import org.koin.android.ext.android.inject
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
+import android.os.BatteryManager
+
+
+
 
 class TrackingService : Service() {
 
@@ -23,6 +29,8 @@ class TrackingService : Service() {
         private val channelId = "trackingNotificationChannel"
         var isStarted = false
     }
+
+    private val api: API by inject<API>()
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
@@ -45,16 +53,31 @@ class TrackingService : Service() {
 
     }
 
+    private fun getBatteryLevel(): Int {
+        val bm = getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+        return bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+    }
+
 
     private fun updateLocationAndStartAlarm() {
         val getLocation = GetLocationImpl(applicationContext)
         getLocation.exec()
+            .flatMap {
+                Timber.d("Got location ${it.latitude} ${it.longitude}, accuracy ${it.accuracy}")
+                val data = DeviceData(lat=it.latitude, lng = it.longitude, accuracy = it.accuracy, datetime = it.time, battery = getBatteryLevel())
+                api.updateDevicePosition("71dbb0997eec19c77395e75afa115287494e53418bbf2adaca17c0f93e57cf8b", data)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+            }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
+
             .subscribe({
-                Timber.d("Got location ${it.latitude} ${it.longitude}, accuracy ${it.accuracy}")
+                Timber.d("data sent")
             },
-                { Timber.e(it.message) })
+                {
+                    Timber.e(it.message)
+                })
         startLocationAlarm()
     }
 
@@ -73,7 +96,7 @@ class TrackingService : Service() {
         return NotificationCompat.Builder(applicationContext, channelId)
             .setContentTitle("GPS Beacon")
             .setContentText("Beacon is working")
-            .setSmallIcon(R.drawable.ic_beacon)
+            .setSmallIcon(info.safronoff.gpsbeacon.R.drawable.ic_beacon)
             .setContentIntent(intent)
             .build()
     }
