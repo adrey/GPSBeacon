@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock
 import androidx.core.app.NotificationCompat
+import info.safronoff.gpsbeacon.MainActivity
 import info.safronoff.gpsbeacon.api.API
 import info.safronoff.gpsbeacon.api.DeviceData
 import info.safronoff.gpsbeacon.utils.GetLocationImpl
@@ -75,7 +76,7 @@ class TrackingService : Service() {
     }
 
     private fun createNotification(): Notification {
-        val notificationIntent = Intent()
+        val notificationIntent = Intent(applicationContext, MainActivity::class.java)
         val intent = PendingIntent.getActivity(
             applicationContext,
             0,

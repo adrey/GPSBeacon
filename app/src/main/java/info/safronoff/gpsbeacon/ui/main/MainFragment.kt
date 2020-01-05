@@ -19,6 +19,7 @@ class MainFragment : Fragment() {
     companion object {
         fun newInstance() = MainFragment()
         private val REQUEST_LOCATION = GetNextId.exec()
+        const val TAG = "MainFragment"
     }
 
     private val vm: MainViewModel by viewModel()
@@ -34,6 +35,7 @@ class MainFragment : Fragment() {
             false
         )
         binding.viewmodel = vm
+        binding.lifecycleOwner = viewLifecycleOwner
         return binding.root
     }
 

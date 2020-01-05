@@ -23,7 +23,9 @@ class DeviceDataRepoImpl(private val api: API) : DeviceDataRepository {
 
     override fun update(data: DeviceData): Single<DeviceData> {
         val id = "71dbb0997eec19c77395e75afa115287494e53418bbf2adaca17c0f93e57cf8b"
-        return api.updateDevicePosition(id, data).doOnSuccess { subject.onNext(it) }
+        return api.updateDevicePosition(id, data).doOnSuccess {
+            subject.onNext(it)
+        }
     }
 
 }
