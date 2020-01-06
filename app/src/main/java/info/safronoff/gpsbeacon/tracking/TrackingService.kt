@@ -1,5 +1,6 @@
 package info.safronoff.gpsbeacon.tracking
 
+import android.annotation.SuppressLint
 import android.app.*
 import android.content.Context
 import android.content.Intent
@@ -8,9 +9,6 @@ import android.os.IBinder
 import android.os.SystemClock
 import androidx.core.app.NotificationCompat
 import info.safronoff.gpsbeacon.MainActivity
-import info.safronoff.gpsbeacon.api.API
-import info.safronoff.gpsbeacon.api.DeviceData
-import info.safronoff.gpsbeacon.utils.GetLocationImpl
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.koin.android.ext.android.inject
@@ -25,10 +23,14 @@ class TrackingService : Service() {
     companion object {
         const val START_COMMAND = "trackingStart"
         const val LOCATION_COMMAND = "updateLocation"
+        const val DEVICE_ID_EXTRA= "DEVICE_ID"
         private val notificationId = 555
         private val channelId = "trackingNotificationChannel"
         var isStarted = false
     }
+
+
+    private lateinit var deviceId: String
 
     private val updateData: UpdateData by inject()
 
@@ -47,7 +49,10 @@ class TrackingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            START_COMMAND -> startService()
+            START_COMMAND -> {
+                deviceId = requireNotNull(intent.getStringExtra(DEVICE_ID_EXTRA))
+                startService()
+            }
             LOCATION_COMMAND -> updateLocationAndStartAlarm()
         }
         return super.onStartCommand(intent, flags, startId)
@@ -63,14 +68,15 @@ class TrackingService : Service() {
     }
 
 
+    @SuppressLint("TimberExceptionLogging")
     private fun updateLocationAndStartAlarm() {
-        disposable = updateData.exec()
+        disposable = updateData.exec(deviceId)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 Timber.d("data updated")
             }, {
-                Timber.e(it)
+                Timber.e(it.message)
             })
         startLocationAlarm()
     }

@@ -9,18 +9,18 @@ import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 
 interface UpdateData {
-    fun exec(): Completable
+    fun exec(id: String): Completable
 }
 
 class UpdateDataImpl(private val getLocation: GetLocation, private val deviceDataRepository: DeviceDataRepository, private val getBatteryLevel: GetBatteryLevel) : UpdateData {
-    override fun exec(): Completable {
+    override fun exec(id: String): Completable {
         return Completable.fromSingle(
             getLocation.exec()
                 .flatMap {
                     Timber.d("Got location ${it.latitude} ${it.longitude}, accuracy ${it.accuracy}")
                     val data = DeviceData(lat=it.latitude, lng = it.longitude, accuracy = it.accuracy, datetime = it.time, battery = getBatteryLevel.exec())
                     deviceDataRepository
-                        .update(data)
+                        .update(id, data)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                 }

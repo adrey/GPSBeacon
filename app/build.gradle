@@ -9,7 +9,7 @@ android {
     buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "info.safronoff.gpsbeacon"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -50,6 +50,8 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:4.2.2'
 
     implementation 'joda-time:joda-time:2.10.4'
+
+    implementation "androidx.security:security-crypto:1.0.0-alpha02"
 
     implementation 'com.google.code.gson:gson:2.8.6'
 

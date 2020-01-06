@@ -18,7 +18,7 @@ val trackingModule = module {
 
     single { provideStartTracking(get()) }
     single { provideGetLocation(get()) }
-    viewModel { MainViewModel(get(), get()) }
+    viewModel { MainViewModel(get(), get(), get()) }
 
 
 }

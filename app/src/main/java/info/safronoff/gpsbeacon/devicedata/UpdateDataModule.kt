@@ -22,6 +22,24 @@ val updateDataModule = module {
         return GetBatteryLevelImpl(context)
     }
 
+    fun provideDeviceIdCache(context: Context): DeviceIdCache {
+        return DeviceIdCacheImpl(context)
+    }
+
+    fun provideDeviceIdRepo(deviceIdCache: DeviceIdCache, api: API): DeviceIdRepository {
+        return DeviceIdRepoImpl(deviceIdCache, api)
+    }
+
+    fun provideGetDeviceId(deviceIdRepository: DeviceIdRepository): GetDeviceId {
+        return GetDeviceIdImpl(deviceIdRepository)
+    }
+
+    single { provideDeviceIdCache(get()) }
+
+    single { provideDeviceIdRepo(get(), get()) }
+
+    single { provideGetDeviceId(get()) }
+
     single { provideBatteryLevel(get()) }
 
     single {provideDataRepository(get())}
