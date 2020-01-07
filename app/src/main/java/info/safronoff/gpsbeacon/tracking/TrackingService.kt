@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
 import android.os.SystemClock
 import androidx.core.app.NotificationCompat
 import info.safronoff.gpsbeacon.MainActivity
@@ -60,6 +61,12 @@ class TrackingService : Service() {
 
     private fun startService() {
         if (!isStarted) {
+            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+            val wakeLock = pm.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                "gps-beacon:trakingServiceLock"
+            )
+            wakeLock.acquire()
             isStarted = true
             updateLocationAndStartAlarm()
             startForeground(notificationId, createNotification())
@@ -127,7 +134,7 @@ class TrackingService : Service() {
                 PendingIntent.FLAG_UPDATE_CURRENT
             )
         }
-        val time = TimeUnit.MINUTES.toMillis(5)
+        val time = TimeUnit.MINUTES.toMillis(10)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             alarmMgr.setExact(
                 AlarmManager.ELAPSED_REALTIME_WAKEUP,

@@ -23,6 +23,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".WakeUpActivity"></activity>
         <service
             android:name=".tracking.TrackingService"
             android:foregroundServiceType="location" />

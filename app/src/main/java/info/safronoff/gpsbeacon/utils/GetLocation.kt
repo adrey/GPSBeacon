@@ -23,7 +23,7 @@ class GetLocationImpl(private val context: Context) : GetLocation {
 
     companion object {
         private const val ACCURACY = 30
-        private const val TIMEOUT = 30L
+        private const val TIMEOUT = 120L
     }
 
     @SuppressLint("MissingPermission")
