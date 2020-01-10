@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-
+        <import type="android.view.View"/>
         <variable
             name="viewmodel"
             type="info.safronoff.gpsbeacon.ui.main.MainViewModel" />
@@ -74,29 +74,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="@{() -> viewmodel.startClick()}"
-            app:layout_constraintBottom_toTopOf="@+id/resetBtn"
+            android:visibility="@{viewmodel.isStarted() ? View.GONE : View.VISIBLE}"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
         <Button
             android:id="@+id/stopBtn"
             android:text="@string/stop"
-            android:visibility="gone"
+            android:visibility="@{viewmodel.isStarted() ? View.VISIBLE : View.GONE}"
+            android:onClick="@{() -> viewmodel.stopClick()}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@+id/resetBtn"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <Button
-            android:id="@+id/resetBtn"
-            android:text="@string/reset"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="@{() -> viewmodel.resetClick()}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
+
+
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

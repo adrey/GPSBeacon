@@ -5,7 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import info.safronoff.gpsbeacon.devicedata.DeviceDataRepository
 import info.safronoff.gpsbeacon.devicedata.GetDeviceId
+import info.safronoff.gpsbeacon.tracking.IsTrackingStarted
 import info.safronoff.gpsbeacon.tracking.StartTracking
+import info.safronoff.gpsbeacon.tracking.StopTracking
 import info.safronoff.gpsbeacon.utils.GetLocation
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -16,15 +18,14 @@ import timber.log.Timber
 class MainViewModel(
     private val startTracking: StartTracking,
     private val deviceDataRepository: DeviceDataRepository,
-    private val getDeviceId: GetDeviceId
+    private val getDeviceId: GetDeviceId,
+    private val isTrackingStarted: IsTrackingStarted,
+    private val stopTracking: StopTracking
 
-) : ViewModel() {
-
-    private var updateDataDisposable: Disposable? = null
-    private var startTrackingDisposable: Disposable? = null
+) : BaseViewModel() {
 
     init {
-        updateDataDisposable = deviceDataRepository.getUpdates().subscribeOn(Schedulers.io())
+        disposables.add(deviceDataRepository.getUpdates().subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 latitude.value = it.lat.toString()
@@ -33,37 +34,62 @@ class MainViewModel(
                 lastUpdate.value = DateTime(it.datetime).toString("dd.MM.yyyy HH:mm:ss")
             }, {
                 Timber.e(it.message)
-            })
+            }))
+        disposables.add(getDeviceId.exec()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                setLink(it)
+            }, {
+                Timber.e(it.message)
+            }))
+        disposables.add(isTrackingStarted.exec()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                isStarted.value = it
+            }, {
+                Timber.e(it.message)
+            }))
     }
     val latitude = MutableLiveData<String>().apply { value = "" }
     val longitude = MutableLiveData<String>().apply { value = "" }
     val accuracy =  MutableLiveData<String>().apply { value = "" }
     val lastUpdate = MutableLiveData<String>().apply { value = "" }
     val link = MutableLiveData<String>().apply { value = "" }
+    val isStarted = MutableLiveData<Boolean>().apply { value = false }
 
 
 
     override fun onCleared() {
         super.onCleared()
-        updateDataDisposable?.let {
-            it.dispose()
-        }
-        startTrackingDisposable?.let {
-            it.dispose()
-        }
+        disposables.dispose()
     }
 
     fun startClick() {
         Timber.d("Start clicked")
-        startTrackingDisposable = getDeviceId.exec()
+        disposables.add(getDeviceId.exec()
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnSuccess { link.value = "http://gps-beaconing.appspot.com/link/$it" }
-            .flatMap {
+            .doOnSuccess {
+                setLink(it)
                 startTracking.exec(it)
-
             }
             .subscribeOn(Schedulers.io())
-            .subscribe({ Timber.d("Tracking started") }, {Timber.d(it.message)})
+            .subscribe(
+                {
+                    Timber.d("Tracking started")
+                },
+                {Timber.d(it.message)}
+            )
+        )
+    }
+
+    fun stopClick() {
+        stopTracking.exec()
+    }
+
+    private fun setLink(id: String) {
+        link.value = "http://gps-beaconing.appspot.com/link/$id"
     }
 
 

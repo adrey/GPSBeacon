@@ -7,7 +7,7 @@ import info.safronoff.gpsbeacon.utils.WakeUp
 import info.safronoff.gpsbeacon.utils.WakeUpImpl
 import org.koin.dsl.module
 
-val updateDataModule = module {
+val deviceDataModule = module {
     fun provideUpdateData(getLocation: GetLocation,
                           deviceDataRepository: DeviceDataRepository,
                           getBatteryLevel: GetBatteryLevel,
@@ -18,8 +18,12 @@ val updateDataModule = module {
             wakeUp = wakeUp)
     }
 
-    fun provideDataRepository(api: API): DeviceDataRepository {
-        return DeviceDataRepoImpl(api)
+    fun provideDeviceDataCache(context: Context): DeviceDataCache {
+        return DeviceDataCacheImpl(context)
+    }
+
+    fun provideDataRepository(api: API, cache: DeviceDataCache): DeviceDataRepository {
+        return DeviceDataRepoImpl(api, cache)
     }
 
     fun provideBatteryLevel(context: Context): GetBatteryLevel {
@@ -38,11 +42,7 @@ val updateDataModule = module {
         return GetDeviceIdImpl(deviceIdRepository)
     }
 
-    fun provideWakeUp(context: Context): WakeUp {
-        return WakeUpImpl(context)
-    }
-
-    single { provideWakeUp(get()) }
+    single { provideDeviceDataCache(get()) }
 
     single { provideDeviceIdCache(get()) }
 
@@ -52,7 +52,7 @@ val updateDataModule = module {
 
     single { provideBatteryLevel(get()) }
 
-    single {provideDataRepository(get())}
+    single {provideDataRepository(get(), get())}
 
     single { provideUpdateData(get(), get(), get(), get()) }
 }

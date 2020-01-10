@@ -1,8 +1,6 @@
 package info.safronoff.gpsbeacon.devicedata
 
-import info.safronoff.gpsbeacon.api.DeviceData
 import info.safronoff.gpsbeacon.utils.GetLocation
-import info.safronoff.gpsbeacon.utils.GetLocationImpl
 import info.safronoff.gpsbeacon.utils.WakeUp
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -23,11 +21,13 @@ class UpdateDataImpl(private val getLocation: GetLocation,
             getLocation.exec()
                 .flatMap {
                     Timber.d("Got location ${it.latitude} ${it.longitude}, accuracy ${it.accuracy}")
-                    val data = DeviceData(lat=it.latitude,
+                    val data = DeviceData(
+                        lat = it.latitude,
                         lng = it.longitude,
                         accuracy = it.accuracy,
                         datetime = it.time,
-                        battery = getBatteryLevel.exec())
+                        battery = getBatteryLevel.exec()
+                    )
                     deviceDataRepository
                         .update(id, data)
                         .subscribeOn(Schedulers.io())

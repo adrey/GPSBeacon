@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.location.LocationManager
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
@@ -17,13 +18,18 @@ import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import info.safronoff.gpsbeacon.devicedata.UpdateData
 import io.reactivex.disposables.Disposable
+import android.app.PendingIntent
+import android.location.Location
+import com.google.android.gms.location.LocationResult
 
 
 class TrackingService : Service() {
 
     companion object {
         const val START_COMMAND = "trackingStart"
-        const val LOCATION_COMMAND = "updateLocation"
+        const val STOP_COMMAND = "trackingStop"
+        const val LOCATION_ALARM_COMMAND = "updateLocationAlarm"
+        const val LOCATION_COMMAND = "locationReceived"
         const val DEVICE_ID_EXTRA= "DEVICE_ID"
         private val notificationId = 555
         private val channelId = "trackingNotificationChannel"
@@ -34,6 +40,8 @@ class TrackingService : Service() {
     private lateinit var deviceId: String
 
     private val updateData: UpdateData by inject()
+
+    private val trackingStateRepo: TrackingStateRepo by inject()
 
     private var disposable: Disposable? = null
 
@@ -54,29 +62,48 @@ class TrackingService : Service() {
                 deviceId = requireNotNull(intent.getStringExtra(DEVICE_ID_EXTRA))
                 startService()
             }
-            LOCATION_COMMAND -> updateLocationAndStartAlarm()
+            STOP_COMMAND -> {
+                stopService()
+            }
+            LOCATION_ALARM_COMMAND -> updateLocationAndStartAlarm()
         }
         return super.onStartCommand(intent, flags, startId)
     }
 
+    private fun stopService() {
+        stopForeground(true)
+        isStarted = false
+        trackingStateRepo.setStarted(isStarted)
+    }
+
     private fun startService() {
         if (!isStarted) {
-            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
-            val wakeLock = pm.newWakeLock(
-                PowerManager.PARTIAL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
-                "gps-beacon:trakingServiceLock"
-            )
-            wakeLock.acquire()
             isStarted = true
+            trackingStateRepo.setStarted(isStarted)
             updateLocationAndStartAlarm()
             startForeground(notificationId, createNotification())
         }
 
     }
 
+    @SuppressLint("MissingPermission")
+    private fun startPeriodicLoactionUpdates() {
+        val locationManager = applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val locationIntent = Intent(applicationContext, TrackingService::class.java)
+        locationIntent.action = LOCATION_COMMAND
+        val locationPendingIntent = PendingIntent.getService(
+            applicationContext,
+            0,
+            locationIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, TimeUnit.MINUTES.toMillis(5), 0f, locationPendingIntent)
+    }
+
 
     @SuppressLint("TimberExceptionLogging")
     private fun updateLocationAndStartAlarm() {
+        startService()
         disposable = updateData.exec(deviceId)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -126,7 +153,7 @@ class TrackingService : Service() {
     private fun startLocationAlarm() {
         val alarmMgr = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val alarmIntent = Intent(applicationContext, TrackingService::class.java).let { intent ->
-            intent.action = LOCATION_COMMAND
+            intent.action = LOCATION_ALARM_COMMAND
             PendingIntent.getService(
                 applicationContext,
                 0,
