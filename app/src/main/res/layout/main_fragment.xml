@@ -15,17 +15,40 @@
         android:layout_height="match_parent"
         tools:context=".ui.main.MainFragment">
 
-        <EditText
-            android:id="@+id/deviceLink"
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{viewmodel.link}"
-            tools:text="00"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:barrierDirection="end"
+            app:constraint_referenced_ids="shareBtn,longitudeLabel,latitudeLabel,accuracyLabel,lastUpdatedLabel" />
 
+        <ImageView
+            android:id="@+id/shareBtn"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_share_black_24dp"
+            android:onClick="@{() -> viewmodel.shareClick()}"
+            android:layout_marginStart="16dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/deviceLink"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@{viewmodel.link}"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp"
+            android:autoLink="web"
+            tools:text="http://test.test"
+            android:textColorLink="@color/blue"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            app:layout_constraintBottom_toBottomOf="@id/shareBtn"
+            app:layout_constraintStart_toEndOf="@id/barrier"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/shareBtn"/>
 
         <TextView
             android:id="@+id/latitudeTV"
@@ -33,9 +56,28 @@
             android:layout_height="wrap_content"
             android:text="@{viewmodel.latitude}"
             tools:text="00"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="16dp"
+            app:layout_constraintStart_toEndOf="@id/barrier"
             app:layout_constraintTop_toBottomOf="@+id/deviceLink"/>
+
+        <TextView
+            android:id="@+id/latitudeLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/latitude"
+            android:layout_marginStart="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/latitudeTV"/>
+
+
+        <TextView
+            android:id="@+id/longitudeLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/longitude"
+            android:layout_marginStart="16dp"
+            app:layout_constraintBaseline_toBaselineOf="@id/longitudeTV"
+            app:layout_constraintStart_toStartOf="parent"/>
 
         <TextView
             android:id="@+id/longitudeTV"
@@ -43,20 +85,38 @@
             android:layout_height="wrap_content"
             android:text="@{viewmodel.longitude}"
             tools:text="00"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="16dp"
+            app:layout_constraintStart_toEndOf="@id/barrier"
             app:layout_constraintTop_toBottomOf="@id/latitudeTV" />
+
+        <TextView
+            android:id="@+id/accuracyLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/accuracy"
+            android:layout_marginStart="16dp"
+            app:layout_constraintBaseline_toBaselineOf="@id/accuracyTV"
+            app:layout_constraintStart_toStartOf="parent"/>
 
         <TextView
             android:id="@+id/accuracyTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{viewmodel.longitude}"
+            android:text="@{viewmodel.accuracy}"
             tools:text="00"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="16dp"
+            app:layout_constraintStart_toEndOf="@id/barrier"
             app:layout_constraintTop_toBottomOf="@id/longitudeTV" />
 
+
+        <TextView
+            android:id="@+id/lastUpdatedLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/last_update"
+            android:layout_marginStart="16dp"
+            app:layout_constraintBaseline_toBaselineOf="@id/lastUpdatedTV"
+            app:layout_constraintStart_toStartOf="parent"/>
 
         <TextView
             android:id="@+id/lastUpdatedTV"
@@ -64,8 +124,8 @@
             android:layout_height="wrap_content"
             android:text="@{viewmodel.lastUpdate}"
             tools:text="00:00:00"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="16dp"
+            app:layout_constraintStart_toEndOf="@id/barrier"
             app:layout_constraintTop_toBottomOf="@id/accuracyTV" />
 
         <Button

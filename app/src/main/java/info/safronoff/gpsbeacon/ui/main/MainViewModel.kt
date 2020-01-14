@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import info.safronoff.gpsbeacon.devicedata.DeviceDataRepository
 import info.safronoff.gpsbeacon.devicedata.GetDeviceId
+import info.safronoff.gpsbeacon.devicedata.ShareLink
 import info.safronoff.gpsbeacon.tracking.IsTrackingStarted
 import info.safronoff.gpsbeacon.tracking.StartTracking
 import info.safronoff.gpsbeacon.tracking.StopTracking
@@ -20,7 +21,8 @@ class MainViewModel(
     private val deviceDataRepository: DeviceDataRepository,
     private val getDeviceId: GetDeviceId,
     private val isTrackingStarted: IsTrackingStarted,
-    private val stopTracking: StopTracking
+    private val stopTracking: StopTracking,
+    private val shareLink: ShareLink
 
 ) : BaseViewModel() {
 
@@ -90,6 +92,10 @@ class MainViewModel(
 
     private fun setLink(id: String) {
         link.value = "http://gps-beaconing.appspot.com/link/$id"
+    }
+
+    fun shareClick() {
+        shareLink.exec(link.value ?: "")
     }
 
 

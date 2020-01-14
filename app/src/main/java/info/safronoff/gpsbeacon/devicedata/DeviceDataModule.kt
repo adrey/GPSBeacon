@@ -42,6 +42,7 @@ val deviceDataModule = module {
         return GetDeviceIdImpl(deviceIdRepository)
     }
 
+
     single { provideDeviceDataCache(get()) }
 
     single { provideDeviceIdCache(get()) }

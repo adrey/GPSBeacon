@@ -1,6 +1,8 @@
 package info.safronoff.gpsbeacon.tracking
 
 import android.content.Context
+import info.safronoff.gpsbeacon.devicedata.ShareLink
+import info.safronoff.gpsbeacon.devicedata.ShareLinkImpl
 import info.safronoff.gpsbeacon.ui.main.MainViewModel
 import info.safronoff.gpsbeacon.utils.GetLocation
 import info.safronoff.gpsbeacon.utils.GetLocationImpl
@@ -35,6 +37,12 @@ val trackingModule = module {
         return StopTrackingImpl(context)
     }
 
+    fun provideShareLink(context: Context): ShareLink {
+        return ShareLinkImpl(context)
+    }
+
+    single { provideShareLink(get()) }
+
     single { provideWakeUp(get()) }
 
     single { provideStartTracking(get()) }
@@ -47,7 +55,7 @@ val trackingModule = module {
 
     single { provideIsStarted(get()) }
 
-    viewModel { MainViewModel(get(), get(), get(), get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get(), get()) }
 
 
 }
