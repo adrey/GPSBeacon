@@ -3,6 +3,7 @@ package info.safronoff.gpsbeacon.ui.main
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import info.safronoff.gpsbeacon.devicedata.DeleteData
 import info.safronoff.gpsbeacon.devicedata.DeviceDataRepository
 import info.safronoff.gpsbeacon.devicedata.GetDeviceId
 import info.safronoff.gpsbeacon.devicedata.ShareLink
@@ -22,7 +23,9 @@ class MainViewModel(
     private val getDeviceId: GetDeviceId,
     private val isTrackingStarted: IsTrackingStarted,
     private val stopTracking: StopTracking,
-    private val shareLink: ShareLink
+    private val shareLink: ShareLink,
+    private val deleteData: DeleteData,
+    private val showError: ShowError
 
 ) : BaseViewModel() {
 
@@ -101,5 +104,18 @@ class MainViewModel(
 
     fun resetClick() {
         Timber.d("RESET")
+        disposables.add(getDeviceId.exec().flatMap { deleteData.exec(it).toSingle { Any() }  }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                Timber.d("data deleted")
+                lastUpdate.value = ""
+                latitude.value = ""
+                longitude.value = ""
+                accuracy.value = ""
+            }, {
+                Timber.e(it)
+                showError.exec(it.message ?: "Error")
+            }))
     }
 }

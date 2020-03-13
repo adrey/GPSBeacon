@@ -7,4 +7,6 @@
     <string name="latitude">latitude</string>
     <string name="accuracy">accuracy</string>
     <string name="last_update">last update</string>
+    <string name="clearData">Clear data</string>
+    <string name="privacyPolicy">By using this app you agree with <a href="https://gps-beaconing.appspot.com/privacy-policy">privacy policy</a></string>
 </resources>

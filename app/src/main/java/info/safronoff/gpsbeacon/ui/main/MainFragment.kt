@@ -3,6 +3,7 @@ package info.safronoff.gpsbeacon.ui.main
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,7 @@ import androidx.fragment.app.Fragment
 import info.safronoff.gpsbeacon.R
 import info.safronoff.gpsbeacon.databinding.MainFragmentBinding
 import info.safronoff.gpsbeacon.utils.GetNextId
+import kotlinx.android.synthetic.main.main_fragment.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainFragment : Fragment() {
@@ -41,6 +43,7 @@ class MainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        privacyPolicyTV.movementMethod = LinkMovementMethod.getInstance()
         context?.let {
             if (ContextCompat.checkSelfPermission(
                     it,

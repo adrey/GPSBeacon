@@ -2,11 +2,9 @@ package info.safronoff.gpsbeacon.api
 
 import info.safronoff.gpsbeacon.devicedata.DeviceData
 import info.safronoff.gpsbeacon.devicedata.DeviceId
+import io.reactivex.Completable
 import io.reactivex.Single
-import retrofit2.http.Body
-import retrofit2.http.POST
-import retrofit2.http.PUT
-import retrofit2.http.Path
+import retrofit2.http.*
 
 interface API {
 
@@ -18,4 +16,7 @@ interface API {
 
     @POST("api/devices")
     fun createDeviceLink(): Single<DeviceId>
+
+    @DELETE("api/devices/{deviceId}")
+    fun clearData(@Path("deviceId") deviceId: String): Completable
 }

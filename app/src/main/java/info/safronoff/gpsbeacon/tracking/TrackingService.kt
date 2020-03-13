@@ -20,7 +20,9 @@ import info.safronoff.gpsbeacon.devicedata.UpdateData
 import io.reactivex.disposables.Disposable
 import android.app.PendingIntent
 import android.location.Location
+import android.widget.Toast
 import com.google.android.gms.location.LocationResult
+import info.safronoff.gpsbeacon.devicedata.DeleteData
 
 
 class TrackingService : Service() {
@@ -31,6 +33,7 @@ class TrackingService : Service() {
         const val LOCATION_ALARM_COMMAND = "updateLocationAlarm"
         const val LOCATION_COMMAND = "locationReceived"
         const val DEVICE_ID_EXTRA= "DEVICE_ID"
+        private const val REFRESH_INTERVAL_MINUTES = 5L
         private val notificationId = 555
         private val channelId = "trackingNotificationChannel"
         var isStarted = false
@@ -65,6 +68,7 @@ class TrackingService : Service() {
             STOP_COMMAND -> {
                 stopService()
             }
+
             LOCATION_ALARM_COMMAND -> updateLocationAndStartAlarm()
         }
         return super.onStartCommand(intent, flags, startId)
@@ -161,7 +165,7 @@ class TrackingService : Service() {
                 PendingIntent.FLAG_UPDATE_CURRENT
             )
         }
-        val time = TimeUnit.MINUTES.toMillis(10)
+        val time = TimeUnit.MINUTES.toMillis(REFRESH_INTERVAL_MINUTES)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             alarmMgr.setExact(
                 AlarmManager.ELAPSED_REALTIME_WAKEUP,

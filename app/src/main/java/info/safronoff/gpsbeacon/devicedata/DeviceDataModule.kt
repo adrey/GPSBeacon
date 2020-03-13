@@ -18,6 +18,10 @@ val deviceDataModule = module {
             wakeUp = wakeUp)
     }
 
+    fun provideDeleteData(deviceDataRepository: DeviceDataRepository): DeleteData {
+        return DeleteDataImpl(deviceDataRepository = deviceDataRepository)
+    }
+
     fun provideDeviceDataCache(context: Context): DeviceDataCache {
         return DeviceDataCacheImpl(context)
     }
@@ -54,6 +58,8 @@ val deviceDataModule = module {
     single { provideBatteryLevel(get()) }
 
     single {provideDataRepository(get(), get())}
+
+    single {provideDeleteData(get())}
 
     single { provideUpdateData(get(), get(), get(), get()) }
 }

@@ -1,6 +1,7 @@
 package info.safronoff.gpsbeacon.devicedata
 
 import info.safronoff.gpsbeacon.api.API
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.subjects.BehaviorSubject
@@ -10,6 +11,8 @@ interface DeviceDataRepository {
     fun getUpdates(): Observable<DeviceData>
 
     fun update(id: String, data: DeviceData): Single<DeviceData>
+
+    fun delete(id: String): Completable
 }
 
 
@@ -33,5 +36,14 @@ class DeviceDataRepoImpl(private val api: API, private val cache: DeviceDataCach
             subject.onNext(it)
         }
     }
+
+    override fun delete(id: String): Completable {
+        return api.clearData(id).doOnComplete {
+            cache.clear()
+            subject.onNext(DeviceData(0.0, 0.0, 0f, 0, 0))
+        }
+    }
+
+
 
 }

@@ -4,12 +4,15 @@ import android.content.Context
 import info.safronoff.gpsbeacon.devicedata.ShareLink
 import info.safronoff.gpsbeacon.devicedata.ShareLinkImpl
 import info.safronoff.gpsbeacon.ui.main.MainViewModel
+import info.safronoff.gpsbeacon.ui.main.ShowError
+import info.safronoff.gpsbeacon.ui.main.ShowErrorImpl
 import info.safronoff.gpsbeacon.utils.GetLocation
 import info.safronoff.gpsbeacon.utils.GetLocationImpl
 import info.safronoff.gpsbeacon.utils.WakeUp
 import info.safronoff.gpsbeacon.utils.WakeUpImpl
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
+import kotlin.math.sin
 
 val trackingModule = module {
 
@@ -41,6 +44,10 @@ val trackingModule = module {
         return ShareLinkImpl(context)
     }
 
+    fun provideShowError(context: Context): ShowError {
+        return ShowErrorImpl(context)
+    }
+
     single { provideShareLink(get()) }
 
     single { provideWakeUp(get()) }
@@ -55,7 +62,9 @@ val trackingModule = module {
 
     single { provideIsStarted(get()) }
 
-    viewModel { MainViewModel(get(), get(), get(), get(), get(), get()) }
+    single { provideShowError(get()) }
+
+    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
 
 
 }

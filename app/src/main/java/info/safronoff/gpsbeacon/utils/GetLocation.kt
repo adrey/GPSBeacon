@@ -23,7 +23,7 @@ class GetLocationImpl(private val context: Context) : GetLocation {
 
     companion object {
         private const val ACCURACY = 30
-        private const val TIMEOUT = 120L
+        private const val TIMEOUT = 60L
     }
 
     @SuppressLint("MissingPermission")
@@ -36,9 +36,18 @@ class GetLocationImpl(private val context: Context) : GetLocation {
         wakeLock.acquire()
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val subject = SingleSubject.create<Location>()
+        var bestLocation: Location? = null
         val listener = object : LocationListener {
             override fun onLocationChanged(location: Location) {
                 Timber.d("Location update, accuracy ${location.accuracy}")
+                if(bestLocation != null) {
+                    if(location.accuracy < requireNotNull(bestLocation).accuracy) {
+                        bestLocation = location
+                    }
+                } else {
+                    bestLocation = location
+                }
+
                 if (location.accuracy < ACCURACY) {
                     subject.onSuccess(location)
                 }
@@ -56,8 +65,11 @@ class GetLocationImpl(private val context: Context) : GetLocation {
 
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0f, listener)
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0f, listener)
 
-        return subject.timeout(TIMEOUT, TimeUnit.SECONDS)
+        return subject.timeout(TIMEOUT, TimeUnit.SECONDS).onErrorReturn {
+                t -> if(bestLocation != null) bestLocation else throw  t
+            }
             .doFinally {
                 locationManager.removeUpdates(listener)
                 wakeLock.release()

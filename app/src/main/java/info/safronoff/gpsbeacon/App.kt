@@ -12,13 +12,15 @@ import timber.log.Timber
 class App : Application() {
     override fun onCreate() {
         super.onCreate()
-        Timber.plant(
-            FileLogTree(
-                requireNotNull(applicationContext.getExternalFilesDir(null)),
-                "log.txt"
+        if(BuildConfig.DEBUG) {
+            Timber.plant(
+                FileLogTree(
+                    requireNotNull(applicationContext.getExternalFilesDir(null)),
+                    "log.txt"
+                )
             )
-        )
-        Timber.plant(Timber.DebugTree())
+            Timber.plant(Timber.DebugTree())
+        }
         startKoin {
             // declare used Android context
             androidContext(this@App)
